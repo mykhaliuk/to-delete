@@ -1651,6 +1651,14 @@
     classnames "^2.2.6"
     memoize-one "^5.0.4"
 
+"@material/react-material-icon@^0.15.0":
+  version "0.15.0"
+  resolved "https://registry.yarnpkg.com/@material/react-material-icon/-/react-material-icon-0.15.0.tgz#7720e67626892dd3d6e2de96a90e2d92e8049293"
+  integrity sha512-KDiMtMEtBZvqlma7wTS0ObY9BSFVtbCVkZiTnde/CxsYEQG9N6QwHClpbS4u/H8mWyXLdlSAQhK7rYSq1XGV0w==
+  dependencies:
+    "@material/react-ripple" "^0.15.0"
+    classnames "^2.2.6"
+
 "@material/react-notched-outline@^0.15.0":
   version "0.15.0"
   resolved "https://registry.yarnpkg.com/@material/react-notched-outline/-/react-notched-outline-0.15.0.tgz#f326809d7c7fdcd4d2b4b5656964c49f8832d66a"
