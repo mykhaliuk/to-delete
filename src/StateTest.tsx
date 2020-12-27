@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 let count = 0;
 export default function StateTest({ children }: any) {
@@ -6,7 +6,9 @@ export default function StateTest({ children }: any) {
   return (
     <>
       {children}
-      <div>rendered: {count}</div>
+      <div>
+        <small>r: {count}</small>
+      </div>
     </>
   );
 }

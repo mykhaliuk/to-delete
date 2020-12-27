@@ -1,46 +1,76 @@
-import React, { useRef, useState, useEffect } from 'react';
-import Card from '@material/react-card';
-import { Button } from '@material/react-button';
-import MaterialIcon from '@material/react-material-icon';
-import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
-import { TextField } from '@rmwc/textfield';
+import React, { useRef, useState, useEffect } from "react";
+import Card from "@material/react-card";
+import { Button } from "@material/react-button";
+import MaterialIcon from "@material/react-material-icon";
+import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
+import { TextField, TextFieldHTMLProps, TextFieldProps } from "@rmwc/textfield";
 
-import '@material/react-card/dist/card.css';
-import '@material/react-button/dist/button.css';
-import '@material/react-checkbox/dist/checkbox.css';
-import '@material/react-icon-button/dist/icon-button.css';
-import '@material/react-list/dist/list.css';
-import '@material/react-material-icon/dist/material-icon.css';
-import '@material/react-text-field/dist/text-field.css';
-import '@material/react-material-icon/dist/material-icon.css';
+import "@material/react-card/dist/card.css";
+import "@material/react-button/dist/button.css";
+import "@material/react-checkbox/dist/checkbox.css";
+import "@material/react-icon-button/dist/icon-button.css";
+import "@material/react-list/dist/list.css";
+import "@material/react-material-icon/dist/material-icon.css";
+import "@material/react-text-field/dist/text-field.css";
+import "@material/react-material-icon/dist/material-icon.css";
 
-import 'src/App-style.scss';
-import s from 'src/styles.module.scss';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import Checkbox from '@material-ui/core/Checkbox';
-import ListItemText from '@material-ui/core/ListItemText';
-import { Drawer } from '@material-ui/core';
-import StateTest from './StateTest';
+import "src/App-style.scss";
+import { TransitionStatus } from "react-transition-group/Transition";
+import s from "src/styles.module.scss";
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
+import Checkbox from "@material-ui/core/Checkbox";
+import ListItemText from "@material-ui/core/ListItemText";
+import { Drawer } from "@material-ui/core";
+import StateTest from "./StateTest";
 
-/**
+import { Transition } from "react-transition-group";
+
+/*
  * 1. List of selectable values to add to input array
  * 2. Add new value to selectable values to add to input array
  * 3. Append selected values to form input
  */
 
+const duration = 300;
+
+const defaultStyle = {
+  transition: `all ${duration}ms ease-in-out`,
+  opacity: 1,
+  transform: "translateX(-100%)",
+  position: "absolute",
+  top: 0,
+  right: 0,
+  bottom: 0,
+  left: 0,
+  backgroundColor: "#fff",
+  zIndex: 10,
+};
+
+const transitionStyles = {
+  entering: { opacity: 1, transform: "translateX(0)" },
+  entered: { opacity: 1, transform: "translateX(0)" },
+  exiting: { opacity: 0, transform: "translateX(-100%)" },
+  exited: { opacity: 0, transform: "translateX(-100%)" },
+} as any;
+
 const ListOfSelectableValues = ({ initialValues = [] }: any) => {
   const [checked, setChecked] = React.useState(initialValues);
   const inputRef = useRef<any>(null);
   const [open, setOpen] = useState(false);
+
   useEffect(() => {
     const input = inputRef.current;
     if (input) {
-      input.value = initialVals.join(', ');
+      input.value =
+        initialVals.length === 1
+          ? initialValues[0]
+          : `${initialVals.length} recipients selected`;
     }
+    // eslint-disable-next-line
   }, [inputRef]);
 
-  const toggleShowlist = () => setOpen((val) => !val);
+  const toggleShowList = () => setOpen((val) => !val);
 
   const handleToggle = (value: string) => () => {
     const currentIndex = checked.indexOf(value);
@@ -58,13 +88,13 @@ const ListOfSelectableValues = ({ initialValues = [] }: any) => {
   const handleSetToList = (arrayVals: string[]) => {
     const input = inputRef.current;
     if (input) {
-      input.value = arrayVals.join(', ');
+      input.value = arrayVals.join(", ");
     }
   };
 
   const handleClose = () => {
-    handleSetToList?.(checked);
-    toggleShowlist?.();
+    toggleShowList?.();
+    handleSetToList(checked);
   };
 
   return (
@@ -72,50 +102,60 @@ const ListOfSelectableValues = ({ initialValues = [] }: any) => {
       <TextField
         label="to"
         // helperText={<HelperText>Help Me!</HelperText>}
-        onClick={toggleShowlist}
+        onClick={toggleShowList}
         trailingIcon={<MaterialIcon role="button" icon="add" />}
         name="to"
         inputRef={inputRef}
         readOnly
+        helpText={{
+          persistent: true,
+          children: `${
+            inputRef.current?.value.split(",").length || 0
+          } recipients selected`,
+        }}
       />
-      <Drawer anchor={'right'} open={open} onClose={handleClose}>
-        <Button onClick={handleClose}>Save</Button>
-        <List dense>
-          {['email1', 'email2', 'email3', 'email14'].map((value) => {
-            const labelId = `checkbox-list-secondary-label-${value}`;
-            return (
-              <ListItem key={value} button>
-                <ListItemText id={labelId} primary={`Line item ${value + 1}`} />
-                <ListItemSecondaryAction>
-                  <Checkbox
-                    edge="end"
-                    onChange={handleToggle(value)}
-                    checked={checked.indexOf(value) !== -1}
-                    inputProps={{ 'aria-labelledby': labelId }}
-                  />
-                </ListItemSecondaryAction>
-              </ListItem>
-            );
-          })}
-        </List>
-      </Drawer>
+      <Transition in={open} timeout={duration}>
+        {(state) => (
+          <div style={{ ...defaultStyle, ...transitionStyles[state] }}>
+            <Button onClick={handleClose}>{"< Back"}</Button>
+            <List dense>
+              {Array.from({ length: 200 }, (_, i) => `email address ${i}`).map(
+                (value) => {
+                  const labelId = `checkbox-list-secondary-label-${value}`;
+
+                  return (
+                    <ListItem key={value} button onClick={handleToggle(value)}>
+                      <ListItemText id={labelId} primary={value} />
+                      <ListItemSecondaryAction>
+                        <Checkbox
+                          onClick={handleToggle(value)}
+                          edge="end"
+                          checked={checked.indexOf(value) !== -1}
+                          inputProps={{ "aria-labelledby": labelId }}
+                        />
+                      </ListItemSecondaryAction>
+                    </ListItem>
+                  );
+                }
+              )}
+            </List>
+          </div>
+        )}
+      </Transition>
     </>
   );
 };
 
-const initialVals = ['email1', 'email2'];
+const initialVals = ["email address 9"];
 
 function App() {
-  const [hiddenFields, setHiddenFields] = useState(true);
-
-  const [testState, setTestState] = useState('');
-
   const handleSubmit = (e: any) => {
     e.stopPropagation();
     e.preventDefault();
     const data = new FormData(e.target);
-
-    console.log(data.getAll('cc'));
+    const to = data.get("to");
+    const object = data.get("subject");
+    console.log(to, object);
   };
 
   return (
@@ -128,12 +168,13 @@ function App() {
             </StateTest>
 
             <StateTest>
-              <input
-                onChange={(e) => setTestState(e.target.value)}
-                value={testState}
+              <Input
+                label="subject"
+                // helperText={<HelperText>Help Me!</HelperText>}
+                name="subject"
+                initialValue="Annual agenda"
               />
             </StateTest>
-
             <StateTest>
               <Button type="submit">Submit</Button>
             </StateTest>
@@ -145,3 +186,30 @@ function App() {
 }
 
 export default App;
+
+const Input = ({
+  initialValue,
+  onChange,
+  ...props
+}: { initialValue: string; onChange?(e?: string): void } & TextFieldProps &
+  TextFieldHTMLProps) => {
+  const [value, setValue] = useState<string>();
+
+  const handleOnBlur = (e: any) => {
+    onChange?.(value);
+  };
+  useEffect(() => {
+    setValue(initialValue);
+  }, [initialValue]);
+
+  return (
+    <TextField
+      value={value}
+      onChange={(e: any) => {
+        setValue(e.target?.value);
+      }}
+      onBlur={handleOnBlur}
+      {...props}
+    />
+  );
+};
